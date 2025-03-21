@@ -25,7 +25,6 @@
     "@gradio/client": "^1.13.1",
     "@gradio/statustracker": "^0.10.5",
     "@gradio/utils": "^0.10.1",
-    "@zerodevx/svelte-json-view": "^1.0.7",
     "vis-network": "^9.1.9"
   },
   "devDependencies": {

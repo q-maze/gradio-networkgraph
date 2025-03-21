@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { JsonView } from "@zerodevx/svelte-json-view";
-
 	import type { Gradio } from "@gradio/utils";
 	import { Block } from "@gradio/atoms";
 	import { StatusTracker } from "@gradio/statustracker";
@@ -36,8 +34,6 @@
 	{/if}
 	<Network
 		gradio={gradio}
-		nodes={value.nodes}
-		edges={value.edges}
-		options={value.options}
+		value={value}
 	/>
 </Block>

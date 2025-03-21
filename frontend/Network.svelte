@@ -1,24 +1,25 @@
 <script lang="ts">
     import type { Gradio } from "@gradio/utils";
-    import { onMount, onDestroy } from "svelte";
+    import { onMount } from "svelte";
     import { Network } from "vis-network";
 
     export let gradio: Gradio;
-    export let nodes;
-    export let edges;
-    export let options;
+    export let value;
     export let selectedNodes = []
     export let selectedEdges = []
     export let nodePositions = []
 
     let container;
     let network;
-  
-    onMount(() => {
+
+    function renderNetwork() {
       if (!container) return;
   
       // Set up the network
-      const data = { nodes, edges, options };
+      var nodes = value.nodes
+      var edges = value.edges
+      var options = value.options
+      var data = { nodes, edges, options };
       network = new Network(container, data);
 
       function sendData(params) {
@@ -27,7 +28,11 @@
           (edgeId) => network.getConnectedNodes(edgeId)
         );
         nodePositions = network.getPositions();
-        return {"nodes": selectedNodes, "edges": selectedEdges, "nodePositions": nodePositions}
+        return {
+          "nodes": selectedNodes,
+          "edges": selectedEdges,
+          "nodePositions": nodePositions
+        }
       }
 
       function selectNode(params) {
@@ -60,19 +65,45 @@
         gradio.dispatch("deselectEdge", sendData(params))
       }
 
+      function getPositions() {
+        nodePositions = network.getPositions();
+        return {
+          "nodes": [],
+          "edges": [],
+          "nodePositions": nodePositions
+        }
+      }
+
+      function postDraw() {
+        gradio.dispatch("afterDrawing", getPositions())
+      }
+
+      function stabilizationStep() {
+        gradio.dispatch("stabilizationStep", getPositions())
+      }
+
       // Event Listeners
       network.on("selectNode", selectNode);
       network.on("deselectNode", deselectNode);
       network.on("selectEdge", selectEdge);
       network.on("deselectEdge", deselectEdge);
+      network.on("afterDrawing", postDraw)
+      network.on("stabilizationStep", postDraw)
   
       // Adjust canvas size
+      container.style.width = options.width || "100%";
+      container.style.height = options.height || "500px";
       network.redraw();
+    };
+  
+    onMount(() => {
+      renderNetwork();
     });
 
-    onDestroy(() => {
-      network.destroy()
-    });
+    $: if (value) {
+      renderNetwork()
+    }
+
   </script>
   
   <style>

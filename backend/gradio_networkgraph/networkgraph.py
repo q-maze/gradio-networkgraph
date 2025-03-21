@@ -8,7 +8,9 @@ class NetworkGraph(Component):
         "selectNode",
         "deselectNode",
         "selectEdge",
-        "deselectEdge"
+        "deselectEdge",
+        "afterDrawing",
+        "stabilizationStep"
     ]
     def preprocess(self, payload):
         """
