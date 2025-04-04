@@ -37,7 +37,7 @@ with gr.Blocks() as demo:
             "options": OPTIONS
         }
 
-    def on_graph_interaction(graph, event_data: gr.EventData):
+    def on_graph_event(graph, event_data: gr.EventData):
         return event_data._data
 
     graph = NetworkGraph(
@@ -48,15 +48,18 @@ with gr.Blocks() as demo:
         },
         label="Static"
     )
-    output = gr.Textbox(label="Selection:")
+    position_output = gr.Textbox(label="Positions:")
+    selection_output = gr.Textbox(label="Selection:")
     btn = gr.Button("Add node")
     node_edge_txt = gr.Textbox(
         value=f"Nodes:\n{nodes.value}\n\nEdges:\n{edges.value}",
     )
-    graph.selectNode(on_graph_interaction, inputs=[graph], outputs=[output])
-    graph.deselectNode(on_graph_interaction, inputs=[graph], outputs=[output])
-    graph.selectEdge(on_graph_interaction, inputs=[graph], outputs=[output])
-    graph.deselectEdge(on_graph_interaction, inputs=[graph], outputs=[output])
+    graph.selectNode(on_graph_event, inputs=[graph], outputs=[selection_output])
+    graph.deselectNode(on_graph_event, inputs=[graph], outputs=[selection_output])
+    graph.selectEdge(on_graph_event, inputs=[graph], outputs=[selection_output])
+    graph.deselectEdge(on_graph_event, inputs=[graph], outputs=[selection_output])
+    graph.stabilizationIterationsDone(on_graph_event, inputs=[graph], outputs=[position_output])
+    graph.stabilized(on_graph_event, inputs=[graph], outputs=[position_output])
     btn.click(add_node, inputs=[nodes, edges], outputs=[nodes, edges])
     nodes.change(lambda nodes, edges: f"Nodes:\n{nodes}\n\nEdges:\n{edges}", [nodes, edges], [node_edge_txt])
     nodes.change(add_node_to_graph, [nodes, edges], [graph])

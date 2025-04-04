@@ -7,7 +7,6 @@
     export let value;
     export let selectedNodes = []
     export let selectedEdges = []
-    export let nodePositions = []
 
     let container;
     let network;
@@ -27,11 +26,9 @@
         selectedEdges = params.edges.map(
           (edgeId) => network.getConnectedNodes(edgeId)
         );
-        nodePositions = network.getPositions();
         return {
           "nodes": selectedNodes,
           "edges": selectedEdges,
-          "nodePositions": nodePositions
         }
       }
 
@@ -66,20 +63,15 @@
       }
 
       function getPositions() {
-        nodePositions = network.getPositions();
-        return {
-          "nodes": [],
-          "edges": [],
-          "nodePositions": nodePositions
-        }
+        return network.getPositions();
       }
 
-      function postDraw() {
-        gradio.dispatch("afterDrawing", getPositions())
+      function stabilizationIterationsDone() {
+        gradio.dispatch("stabilizationIterationsDone", getPositions())
       }
 
-      function stabilizationStep() {
-        gradio.dispatch("stabilizationStep", getPositions())
+      function stabilized() {
+        gradio.dispatch("stabilized", getPositions())
       }
 
       // Event Listeners
@@ -87,8 +79,8 @@
       network.on("deselectNode", deselectNode);
       network.on("selectEdge", selectEdge);
       network.on("deselectEdge", deselectEdge);
-      network.on("afterDrawing", postDraw)
-      network.on("stabilizationStep", postDraw)
+      network.on("stabilizationIterationsDone", stabilizationIterationsDone)
+      network.on("stabilized", stabilized)
   
       // Adjust canvas size
       container.style.width = options.width || "100%";

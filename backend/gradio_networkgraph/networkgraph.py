@@ -9,8 +9,8 @@ class NetworkGraph(Component):
         "deselectNode",
         "selectEdge",
         "deselectEdge",
-        "afterDrawing",
-        "stabilizationStep"
+        "stabilizationIterationsDone",
+        'stabilized'
     ]
     def preprocess(self, payload):
         """
@@ -36,10 +36,6 @@ class NetworkGraph(Component):
         return {
             'nodes': [1],
             'edges': [[1, 2]],
-            'nodePositions': {
-                '1':{'x': -6, 'y': 54},
-                '2': {'x': -2, 'y': -103}
-            }
         }
 
     def example_value(self):
