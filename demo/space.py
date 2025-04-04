@@ -3,7 +3,7 @@ import gradio as gr
 from app import demo as app
 import os
 
-_docs = {'NetworkGraph': {'description': 'A base class for defining methods that all input/output components should have.', 'members': {'__init__': {'value': {'type': 'Any', 'default': 'None', 'description': None}, 'label': {'type': 'str | None', 'default': 'None', 'description': None}, 'info': {'type': 'str | None', 'default': 'None', 'description': None}, 'show_label': {'type': 'bool | None', 'default': 'None', 'description': None}, 'container': {'type': 'bool', 'default': 'True', 'description': None}, 'scale': {'type': 'int | None', 'default': 'None', 'description': None}, 'min_width': {'type': 'int | None', 'default': 'None', 'description': None}, 'interactive': {'type': 'bool | None', 'default': 'None', 'description': None}, 'visible': {'type': 'bool', 'default': 'True', 'description': None}, 'elem_id': {'type': 'str | None', 'default': 'None', 'description': None}, 'elem_classes': {'type': 'list[str] | str | None', 'default': 'None', 'description': None}, 'render': {'type': 'bool', 'default': 'True', 'description': None}, 'key': {'type': 'int | str | None', 'default': 'None', 'description': None}, 'load_fn': {'type': 'Callable | None', 'default': 'None', 'description': None}, 'every': {'type': 'Timer | float | None', 'default': 'None', 'description': None}, 'inputs': {'type': 'Component | Sequence[Component] | set[Component] | None', 'default': 'None', 'description': None}}, 'postprocess': {}, 'preprocess': {}}, 'events': {'selectNode': {'type': None, 'default': None, 'description': ''}, 'deselectNode': {'type': None, 'default': None, 'description': ''}, 'selectEdge': {'type': None, 'default': None, 'description': ''}, 'deselectEdge': {'type': None, 'default': None, 'description': ''}, 'afterDrawing': {'type': None, 'default': None, 'description': ''}, 'stabilizationStep': {'type': None, 'default': None, 'description': ''}}}, '__meta__': {'additional_interfaces': {}}}
+_docs = {'NetworkGraph': {'description': 'A base class for defining methods that all input/output components should have.', 'members': {'__init__': {'value': {'type': 'Any', 'default': 'None', 'description': None}, 'label': {'type': 'str | None', 'default': 'None', 'description': None}, 'info': {'type': 'str | None', 'default': 'None', 'description': None}, 'show_label': {'type': 'bool | None', 'default': 'None', 'description': None}, 'container': {'type': 'bool', 'default': 'True', 'description': None}, 'scale': {'type': 'int | None', 'default': 'None', 'description': None}, 'min_width': {'type': 'int | None', 'default': 'None', 'description': None}, 'interactive': {'type': 'bool | None', 'default': 'None', 'description': None}, 'visible': {'type': 'bool', 'default': 'True', 'description': None}, 'elem_id': {'type': 'str | None', 'default': 'None', 'description': None}, 'elem_classes': {'type': 'list[str] | str | None', 'default': 'None', 'description': None}, 'render': {'type': 'bool', 'default': 'True', 'description': None}, 'key': {'type': 'int | str | None', 'default': 'None', 'description': None}, 'load_fn': {'type': 'Callable | None', 'default': 'None', 'description': None}, 'every': {'type': 'Timer | float | None', 'default': 'None', 'description': None}, 'inputs': {'type': 'Component | Sequence[Component] | set[Component] | None', 'default': 'None', 'description': None}}, 'postprocess': {}, 'preprocess': {}}, 'events': {'selectNode': {'type': None, 'default': None, 'description': ''}, 'deselectNode': {'type': None, 'default': None, 'description': ''}, 'selectEdge': {'type': None, 'default': None, 'description': ''}, 'deselectEdge': {'type': None, 'default': None, 'description': ''}, 'stabilizationIterationsDone': {'type': None, 'default': None, 'description': ''}, 'stabilized': {'type': None, 'default': None, 'description': ''}}}, '__meta__': {'additional_interfaces': {}}}
 
 abs_path = os.path.join(os.path.dirname(__file__), "css.css")
 
@@ -77,7 +77,7 @@ with gr.Blocks() as demo:
             "options": OPTIONS
         }
 
-    def on_graph_interaction(graph, event_data: gr.EventData):
+    def on_graph_event(graph, event_data: gr.EventData):
         return event_data._data
 
     graph = NetworkGraph(
@@ -88,15 +88,18 @@ with gr.Blocks() as demo:
         },
         label="Static"
     )
-    output = gr.Textbox(label="Selection:")
+    position_output = gr.Textbox(label="Positions:")
+    selection_output = gr.Textbox(label="Selection:")
     btn = gr.Button("Add node")
     node_edge_txt = gr.Textbox(
         value=f"Nodes:\n{nodes.value}\n\nEdges:\n{edges.value}",
     )
-    graph.selectNode(on_graph_interaction, inputs=[graph], outputs=[output])
-    graph.deselectNode(on_graph_interaction, inputs=[graph], outputs=[output])
-    graph.selectEdge(on_graph_interaction, inputs=[graph], outputs=[output])
-    graph.deselectEdge(on_graph_interaction, inputs=[graph], outputs=[output])
+    graph.selectNode(on_graph_event, inputs=[graph], outputs=[selection_output])
+    graph.deselectNode(on_graph_event, inputs=[graph], outputs=[selection_output])
+    graph.selectEdge(on_graph_event, inputs=[graph], outputs=[selection_output])
+    graph.deselectEdge(on_graph_event, inputs=[graph], outputs=[selection_output])
+    graph.stabilizationIterationsDone(on_graph_event, inputs=[graph], outputs=[position_output])
+    graph.stabilized(on_graph_event, inputs=[graph], outputs=[position_output])
     btn.click(add_node, inputs=[nodes, edges], outputs=[nodes, edges])
     nodes.change(lambda nodes, edges: f"Nodes:\n{nodes}\n\nEdges:\n{edges}", [nodes, edges], [node_edge_txt])
     nodes.change(add_node_to_graph, [nodes, edges], [graph])
